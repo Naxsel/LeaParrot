@@ -18,7 +18,7 @@ Project for Pervasive Computing - M7012E, Luleå University of Technology
 
 
 ### Some Links
-[Control a Parrot AR Drone 2.0 using a Leap Motion in Node.js](https://github.com/charliegerard/leap_drone)
-[Control the Parrot AR Drone 2.0 with the Leap Motion in Cylon.js](https://github.com/charliegerard/cylon-projects/tree/master/cylon-drone-leapmotion)
+* [Control a Parrot AR Drone 2.0 using a Leap Motion in Node.js](https://github.com/charliegerard/leap_drone)
+* [Control the Parrot AR Drone 2.0 with the Leap Motion in Cylon.js](https://github.com/charliegerard/cylon-projects/tree/master/cylon-drone-leapmotion)
      
     
