@@ -1,12 +1,18 @@
 # LeaParrot
 Project for Pervasive Computing - M7012E, Luleå University of Technology
 
+## Objectives
+* Pilot a Parrot AR Drone using the Leap Motion Controller
+* Display the visuals from the camera into an VR device
+* Use motion planning systems to control the Drone ([LeapMotion](https://www.leapmotion.com/))
 
 ## Doc
 
-* [Motion Leap SDK](https://www.leapmotion.com/setup)
+* Node.js: How to [install](https://nodejs.org/es/)
 
-* [Cylon: JavaScript Robotics](https://cylonjs.com/)
+* To be able to work with Leap Motion it is need the [Motion Leap SDK](https://www.leapmotion.com/setup)
+
+* [Cylon: JavaScript Robotics](https://cylonjs.com/), framework for JavaScript, which has an extensible system for connecting to hardware devices such ARDrone or LeapMotion
      - [Drone](https://cylonjs.com/documentation/drivers/ardrone-flight/)
      - [Motion Leap](https://cylonjs.com/documentation/platforms/leapmotion/)
      
