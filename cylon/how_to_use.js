@@ -11,10 +11,10 @@ Cylon.robot({
 
     work: function(my) {
         my.drone.takeoff();
-        after((10).seconds(), function() {
+        after((5).seconds(), function() {
             my.drone.land();
         });
-        after((15).seconds(), function() {
+        after((10).seconds(), function() {
             my.drone.stop();
         });
     }
