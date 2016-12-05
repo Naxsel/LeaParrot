@@ -3,13 +3,12 @@
   "version": "0.0.1",
   "description": "Parrot AR + Motion Leap application",
   "scripts": {
-    "start": "node main.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "cylon": "^1.3.0",
     "cylon-api-http": "^0.4.1",
     "cylon-ardrone": "^0.21.0",
-    "cylon-leapmotion": "^0.21.0",
-    "ffmpeg": "0.0.4"
+    "cylon-leapmotion": "^0.21.0"
   }
 }
