@@ -1,4 +1,7 @@
+//
+
 var xbox = require('xbox-controller-node');
+
 
 xbox.on('a', function () {
     console.log('[A] button press');
@@ -73,3 +76,5 @@ xbox.on('rightstickDown', function () {
 xbox.on('rightstickUp', function () {
     console.log('Moving [RIGHTSTICK] UP');
 });
+
+xbox.configure();

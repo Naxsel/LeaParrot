@@ -4,6 +4,8 @@ var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
 
+xbox.listHIDDevices();
+
 Cylon.api("http",{
     port: 8080,
     ssl: false
@@ -25,19 +27,36 @@ Cylon.robot({
     },
 
     work: function(my) {
-        ["a","b","x","y"].forEach(function(button){
-           xbox.on(button, function(){
-               console.log('['+button+'] button press');
-               if(landed){
-                   my.drone.takeoff();
-                   landed = false;
-               }else{
-                   my.drone.land();
-                   landed = true;
-               }
-           });
+        xbox.on('leftstickDown', function () {
+            console.log('Moving [LEFTSTICK] DOWN');
+        });
+
+        xbox.on('leftstickUp', function () {
+            console.log('Moving [LEFTSTICK] UP');
+        });
+
+        xbox.on('rightstickLeft', function () {
+            console.log('Moving [RIGHTSTICK] LEFT');
+        });
+        xbox.on('rightstickRight', function () {
+            console.log('Moving [RIGHTSTICK] RIGHT');
+        });
+
+        xbox.on('rightstickDown', function () {
+            console.log('Moving [RIGHTSTICK] DOWN');
+        });
+        xbox.on('rightstickUp', function () {
+            console.log('Moving [RIGHTSTICK] UP');
+        });
+        xbox.on('leftstickRight', function () {
+            console.log('Moving [LEFTSTICK] RIGHT');
+        });
+        xbox.on('leftstickLeft', function () {
+            console.log('Moving [LEFTSTICK] LEFT');
         });
     }
 });
+
+
 
 Cylon.start();
