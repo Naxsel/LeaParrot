@@ -1,11 +1,25 @@
 "use strict";
 
+//Imports
 var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
-var cron = require("node-cron");
 
-// xbox.listHIDDevices();
+//Leap Config
+var TURN_TRESHOLD = 0.2,
+    TURN_SPEED_FACTOR = 2.0;
+
+var DIRECTION_THRESHOLD = 0.25,
+    DIRECTION_SPEED_FACTOR = 0.05;
+
+var UP_CONTROL_THRESHOLD = 50,
+    UP_SPEED_FACTOR = 0.01,
+    CIRCLE_THRESHOLD = 1.5;
+
+var handStartPosition = [],
+    handStartDirection = [];
+
+var handWasClosedInLastFrame = false;
 
 Cylon.api("http",{
     port: 8080,
@@ -18,13 +32,15 @@ Cylon.robot({
 
     connections: {
         ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
-        leapmotion: { adaptor: 'leapmotion'}
+        leapmotion: { adaptor: 'leapmotion'},
+        keyboard: { adaptor: 'keyboard' }
     },
 
     devices: {
         drone: {driver: 'ardrone'},
         nav : {driver: 'ardrone-nav'},
-        leapmotion: { driver: 'leapmotion'}
+        leapmotion: { driver: 'leapmotion'},
+        keyboard: { driver: 'keyboard', connection:'keyboard' }
     },
 
     work: function(my) {
@@ -36,68 +52,163 @@ Cylon.robot({
             console.log("LOW BATTERY: " +data +" %");
         });
 
+        //Keyboard Mapping
+        my.keyboard.on("right", my.drone.rightFlip);
+        my.keyboard.on("left", my.drone.leftFlip);
+        my.keyboard.on("up", my.drone.frontFlip);
+        my.keyboard.on("down", my.drone.backFlip);
+        my.keyboard.on("spaceboard", function(){
+            if (landed) {
+                my.drone.takeoff();
+                landed = false;
+            }else{
+                my.drone.land();
+                landed = true;
+            }
+        });
+
         //Leap Motion Mapping
 
-        my.leapmotion.on('frame', function(frame){
-            if(frame.hands.length > 0){
-                my.drone.takeoff();
-            } else {
-                my.drone.land();
+        my.leapmotion.on("gesture", function(gesture) {
+            var type = gesture.type,
+                progress = gesture.progress;
+
+            if (type === "keyTap" || type === "screenTap") {
+                if(landed) {
+                    my.drone.takeoff();
+                    landed = false;
+                }else{
+                    my.drone.land();
+                    landed = true;
+                }
             }
 
-            if(frame.valid && frame.gestures.length > 0){
-                frame.gestures.forEach(function(g){
-                    if(g.type == 'swipe'){
-                        var currentPosition = g.position;
-                        var startPosition = g.startPosition;
+            if (type === "circle" && stop && progress > CIRCLE_THRESHOLD) {
+                if (gesture.normal[2] < 0) {
+                    my.drone.rightFlip;
+                }
 
-                        var xDirection = currentPosition[0] - startPosition[0];
-                        var yDirection = currentPosition[1] - startPosition[1];
-                        var zDirection = currentPosition[2] - startPosition[2];
+                if (gesture.normal[2] > 0) {
+                    my.drone.leftFlip;
+                }
+            }
+        });
 
-                        var xAxis = Math.abs(xDirection);
-                        var yAxis = Math.abs(yDirection);
-                        var zAxis = Math.abs(zDirection);
+        my.leapmotion.on("hand", function(hand) {
+            var signal, value;
 
-                        var superiorPosition  = Math.max(xAxis, yAxis, zAxis);
+            var handOpen = !!hand.fingers.filter(function(f) {
+                return f.extended;
+            }).length;
 
-                        if(superiorPosition === xAxis){
-                            if(xDirection < 0){
-                                console.log('LEFT');
-                                my.drone.left();
-                            } else {
-                                my.drone.right();
-                                console.log('RIGHT');
-                            }
-                        }
+            if (handOpen) {
+                if (handWasClosedInLastFrame) {
+                    handStartPosition = hand.palmPosition;
+                    handStartDirection = hand.direction;
+                }
 
-                        if(superiorPosition === zAxis){
-                            if(zDirection > 0){
-                                console.log('BACKWARDS');
-                                my.drone.back();
-                            } else {
-                                console.log('FORWARD');
-                                my.drone.forward();
-                            }
-                        }
+                var horizontal = Math.abs(handStartDirection[0] - hand.direction[0]),
+                    vertical = Math.abs(hand.palmPosition[1] - handStartPosition[1]);
 
-                        if(superiorPosition === yAxis){
-                            if(yDirection > 0){
-                                console.log('UP');
-                                my.drone.up(1);
-                            } else {
-                                console.log('DOWN');
-                                my.drone.down(1);
-                            }
-                        }
-                    } else if(g.type === 'keyTap'){
-                        my.drone.backFlip();
-                        after((5).seconds(), function(){
-                            my.drone.land();
-                        })
+                // TURNS
+                if (horizontal > TURN_TRESHOLD) {
+                    signal = handStartDirection[0] - hand.direction[0];
+                    value = (horizontal - TURN_TRESHOLD) * TURN_SPEED_FACTOR;
+
+                    if (signal > 0) {
+                        my.drone.counterClockwise(value);
                     }
-                })
+
+                    if (signal < 0) {
+                        my.drone.clockwise(value);
+                    }
+                }
+
+                // UP and DOWN
+                if (vertical > UP_CONTROL_THRESHOLD) {
+                    if ((hand.palmPosition[1] - handStartPosition[1]) >= 0) {
+                        signal = 1;
+                    } else {
+                        signal = -1;
+                    }
+
+                    value = Math.round(vertical - UP_CONTROL_THRESHOLD) * UP_SPEED_FACTOR;
+
+                    if (signal > 0) {
+                        my.drone.up(value);
+                    }
+
+                    if (signal < 0) {
+                        my.drone.down(value);
+                    }
+                }
+
+                // DIRECTION FRONT/BACK
+                if ((Math.abs(hand.palmNormal[2]) > DIRECTION_THRESHOLD)) {
+                    if (hand.palmNormal[2] > 0) {
+                        value = Math.abs(
+                            Math.round(hand.palmNormal[2] * 10 + DIRECTION_THRESHOLD) *
+                            DIRECTION_SPEED_FACTOR
+                        );
+
+                        my.drone.forward(value);
+                    }
+
+                    if (hand.palmNormal[2] < 0) {
+                        value = Math.abs(
+                            Math.round(hand.palmNormal[2] * 10 - DIRECTION_THRESHOLD) *
+                            DIRECTION_SPEED_FACTOR
+                        );
+
+                        my.drone.back(value);
+                    }
+                }
+
+                // DIRECTION LEFT/RIGHT
+                if (Math.abs(hand.palmNormal[0]) > DIRECTION_THRESHOLD) {
+                    if (hand.palmNormal[0] > 0) {
+                        value = Math.abs(
+                            Math.round(hand.palmNormal[0] * 10 + DIRECTION_THRESHOLD) *
+                            DIRECTION_SPEED_FACTOR
+                        );
+
+                        my.drone.left(value);
+                    }
+
+                    if (hand.palmNormal[0] < 0) {
+                        value = Math.abs(
+                            Math.round(hand.palmNormal[0] * 10 - DIRECTION_THRESHOLD) *
+                            DIRECTION_SPEED_FACTOR
+                        );
+
+                        my.drone.right(value);
+                    }
+                }
+
+                // AUTO FREEZE
+                if (
+                    // within left/right threshold
+                (Math.abs(hand.palmNormal[0]) < DIRECTION_THRESHOLD) &&
+
+                // within forward/back threshold
+                (Math.abs(hand.palmNormal[2]) < DIRECTION_THRESHOLD) &&
+
+                // within up/down threshold
+                Math.abs(hand.palmPosition[1] - handStartPosition[1]) <
+                UP_CONTROL_THRESHOLD &&
+
+                // within turn threshold
+                Math.abs(handStartDirection[0] - hand.direction[0]) <
+                TURN_TRESHOLD) {
+                    my.drone.stop();
+                }
             }
+
+            if (!handOpen && !handWasClosedInLastFrame) {
+                my.drone.stop();
+            }
+
+            handWasClosedInLastFrame = !handOpen;
         });
 
         //Xbox Controller Mapping
@@ -128,6 +239,7 @@ Cylon.robot({
                 if (land > 20){
                     my.drone.land();
                     landed=true;
+                    land = 0;
                 }else{
                     my.drone.down(0.3);
                     land++;
@@ -154,10 +266,24 @@ Cylon.robot({
             my.drone.left(0.3);
             land = 0;
         });
-
-        // after((10).seconds(), function(){
-        //     my.drone.land();
-        // });
+        xbox.on('a', function() {
+            console.log('[A] button press');
+            my.drone.backFlip();
+        });
+        xbox.on('b', function() {
+            console.log('[B] button press');
+            my.drone.leftFlip();
+        });
+        xbox.on('x', function() {
+            console.log('[X] button press');
+            my.drone.rightFlip();
+        });
+        xbox.on('y', function() {
+            console.log('[Y] button press');
+            my.drone.frontFlip();
+        });
+        //TODO
+        //add triggers
     }
 });
 
