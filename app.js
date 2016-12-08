@@ -58,7 +58,7 @@ Cylon.robot({
         my.keyboard.on("left", my.drone.leftFlip);
         my.keyboard.on("up", my.drone.frontFlip);
         my.keyboard.on("down", my.drone.backFlip);
-        my.keyboard.on("spaceboard", function(){
+        my.keyboard.on("space", function(){
             if (landed) {
                 my.drone.takeoff();
                 landed = false;

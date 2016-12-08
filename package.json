@@ -11,6 +11,7 @@
     "cylon-ardrone": "^0.21.0",
     "cylon-keyboard": "^0.17.0",
     "cylon-leapmotion": "^0.21.0",
+    "cylon-opencv": "^0.15.0",
     "xbox-controller-node": "^1.6.0"
   }
 }
