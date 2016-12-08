@@ -2,7 +2,6 @@
 
 //Imports
 var Cylon = require("cylon");
-var xbox = require("xbox-controller-node");
 var ffmpeg = require("ffmpeg");
 var arDrone = require('ar-drone');
 var stream  = arDrone.createClient();
@@ -35,14 +34,16 @@ Cylon.robot({
     connections: {
         ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
         leapmotion: { adaptor: 'leapmotion'},
-        keyboard: { adaptor: 'keyboard' }
+        keyboard: { adaptor: 'keyboard' },
+        joystick: { adaptor: "joystick" }
     },
 
     devices: {
         drone: {driver: 'ardrone'},
         nav : {driver: 'ardrone-nav'},
         leapmotion: { driver: 'leapmotion'},
-        keyboard: { driver: 'keyboard', connection:'keyboard' }
+        keyboard: { driver: 'keyboard', connection:'keyboard' },
+        controller: { driver: "joystick", config: config, connection: "joystick" }
     },
 
     work: function(my) {
