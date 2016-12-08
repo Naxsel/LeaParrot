@@ -3,6 +3,7 @@
 //Imports
 var Cylon = require("cylon");
 var xbox = require("xbox-controller-node");
+var ffmpeg = require("ffmpeg");
 var arDrone = require('ar-drone');
 var stream  = arDrone.createClient();
 
@@ -58,7 +59,8 @@ Cylon.robot({
         my.keyboard.on("left", my.drone.leftFlip);
         my.keyboard.on("up", my.drone.frontFlip);
         my.keyboard.on("down", my.drone.backFlip);
-        my.keyboard.on("spaceboard", function(){
+        my.keyboard.on("space", function(){
+            console.log("space pressed");
             if (landed) {
                 my.drone.takeoff();
                 landed = false;
@@ -290,4 +292,4 @@ Cylon.robot({
 
 Cylon.start();
 
-require('ar-drone-png-stream')(client, { port: 8081 });
+require('ar-drone-png-stream')(stream, { port: 8081 });

@@ -12,6 +12,7 @@
     "cylon-ardrone": "^0.21.0",
     "cylon-keyboard": "^0.17.0",
     "cylon-leapmotion": "^0.21.0",
+    "ffmpeg": "0.0.4",
     "xbox-controller-node": "^1.6.0"
   },
   "ip": "192.168.1.1"
