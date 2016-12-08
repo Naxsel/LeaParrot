@@ -2,8 +2,9 @@
 
 //Imports
 var Cylon = require("cylon");
-var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
+var arDrone = require('ar-drone');
+var stream  = arDrone.createClient();
 
 //Leap Config
 var TURN_TRESHOLD = 0.2,
@@ -288,3 +289,5 @@ Cylon.robot({
 });
 
 Cylon.start();
+
+require('ar-drone-png-stream')(client, { port: 8081 });
