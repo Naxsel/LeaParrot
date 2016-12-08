@@ -3,8 +3,11 @@
 //Imports
 var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
+var xbox = require("xbox-controller-node");
 var arDrone = require('ar-drone');
 var stream  = arDrone.createClient();
+require('ar-drone-png-stream')(stream, { port: 8081 });
+
 
 //Leap Config
 var TURN_TRESHOLD = 0.2,
@@ -34,16 +37,14 @@ Cylon.robot({
     connections: {
         ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
         leapmotion: { adaptor: 'leapmotion'},
-        keyboard: { adaptor: 'keyboard' },
-        joystick: { adaptor: "joystick" }
+        keyboard: { adaptor: 'keyboard' }
     },
 
     devices: {
         drone: {driver: 'ardrone'},
         nav : {driver: 'ardrone-nav'},
         leapmotion: { driver: 'leapmotion'},
-        keyboard: { driver: 'keyboard', connection:'keyboard' },
-        controller: { driver: "joystick", config: config, connection: "joystick" }
+        keyboard: { driver: 'keyboard', connection:'keyboard' }
     },
 
     work: function(my) {
@@ -293,4 +294,3 @@ Cylon.robot({
 
 Cylon.start();
 
-require('ar-drone-png-stream')(stream, { port: 8081 });
