@@ -3,8 +3,6 @@
 //Imports
 var Cylon = require("cylon");
 var xbox = require("xbox-controller-node");
-var arDrone = require('ar-drone');
-var stream  = arDrone.createClient();
 
 //Leap Config
 var TURN_TRESHOLD = 0.2,
@@ -34,14 +32,16 @@ Cylon.robot({
     connections: {
         ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
         leapmotion: { adaptor: 'leapmotion'},
-        keyboard: { adaptor: 'keyboard' }
+        keyboard: { adaptor: 'keyboard' },
+        opencv: {adaptor: "opencv"}
     },
 
     devices: {
         drone: {driver: 'ardrone'},
         nav : {driver: 'ardrone-nav'},
         leapmotion: { driver: 'leapmotion'},
-        keyboard: { driver: 'keyboard', connection:'keyboard' }
+        keyboard: { driver: 'keyboard', connection:'keyboard' },
+        window: { driver: "window", connection: "opencv"}
     },
 
     work: function(my) {
@@ -284,10 +284,18 @@ Cylon.robot({
             my.drone.frontFlip();
         });
         //TODO
-        //add triggers
+        //add triggers and instal cv
+
+
+        //Stream
+        my.drone.getPngStream().on("data", function(png) {
+            my.opencv.readImage(png, function(err, img) {
+                my.window.show(img);
+            });
+        });
+
     }
 });
 
 Cylon.start();
 
-require('ar-drone-png-stream')(client, { port: 8081 });
