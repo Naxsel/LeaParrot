@@ -1,6 +1,9 @@
 "use strict";
 
-//Imports
+//=====================================================================================================================================================//
+                                                                    //IMPORTS
+//=====================================================================================================================================================//
+
 var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
@@ -9,7 +12,10 @@ var stream  = arDrone.createClient();
 require('ar-drone-png-stream')(stream, { port: 8081 });
 
 
-//Leap Config
+//=====================================================================================================================================================//
+                                                        //LEAP MOTION PARAMETERS SETUP
+//=====================================================================================================================================================//
+
 var TURN_TRESHOLD = 0.2,
     TURN_SPEED_FACTOR = 2.0;
 
@@ -25,15 +31,22 @@ var handStartPosition = [],
 
 var handWasClosedInLastFrame = false;
 
+//=====================================================================================================================================================//
+                                                                //WEB SERVER SETUP
+//=====================================================================================================================================================//
+
 Cylon.api("http",{
     port: 8080,
     ssl: false
 });
 
-
+//=====================================================================================================================================================//
+                                                                //CONTROL OF DRONE
+//=====================================================================================================================================================//
 Cylon.robot({
     name: "LeaDrone",
 
+    //cylon connections
     connections: {
         ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
         leapmotion: { adaptor: 'leapmotion'},
@@ -42,7 +55,7 @@ Cylon.robot({
 
     devices: {
         drone: {driver: 'ardrone'},
-        nav : {driver: 'ardrone-nav'},
+        nav : {driver: 'ardrone-nav'},//gives drone's information/state
         leapmotion: { driver: 'leapmotion'},
         keyboard: { driver: 'keyboard', connection:'keyboard' }
     },
@@ -52,42 +65,53 @@ Cylon.robot({
         var landed = true;
         var land = 0;
 
+        //Show percentage of battery if it's low
         my.nav.on('lowBattery', function(data){
             console.log("LOW BATTERY: " +data +" %");
         });
 
-        //Keyboard Mapping
+//=====================================================================================================================================================//
+                                                        //KEYBOARD MAPPING
+//=====================================================================================================================================================//
+
+        //With keyboard arrows it does flips to that side
         my.keyboard.on("right", my.drone.rightFlip);
         my.keyboard.on("left", my.drone.leftFlip);
         my.keyboard.on("up", my.drone.frontFlip);
         my.keyboard.on("down", my.drone.backFlip);
+
         my.keyboard.on("space", function(){
             console.log("space pressed");
+            //If the drone is not flying, it takes off pressing the space
             if (landed) {
                 my.drone.takeoff();
                 landed = false;
-            }else{
+            }else{//If the drone is flying, it lands pressing the space
                 my.drone.land();
                 landed = true;
             }
         });
 
-        //Leap Motion Mapping
+//=====================================================================================================================================================//
+                                            //LEAP MOTION CONTROLLER MAPPING
+//=====================================================================================================================================================//
 
         my.leapmotion.on("gesture", function(gesture) {
             var type = gesture.type,
                 progress = gesture.progress;
 
+            //KeyTap as click with a mouse
             if (type === "keyTap" || type === "screenTap") {
-                if(landed) {
+                if(landed) {//If it's not flying, it takes off
                     my.drone.takeoff();
                     landed = false;
-                }else{
+                }else{//If it's flying, it lands
                     my.drone.land();
                     landed = true;
                 }
             }
 
+            //Flip with the gesture of a circle with the finger
             if (type === "circle" && stop && progress > CIRCLE_THRESHOLD) {
                 if (gesture.normal[2] < 0) {
                     my.drone.rightFlip;
@@ -215,8 +239,10 @@ Cylon.robot({
 
             handWasClosedInLastFrame = !handOpen;
         });
+//=====================================================================================================================================================//
+                                                    //XBOX CONTROLLER MAPPING
+//=====================================================================================================================================================//
 
-        //Xbox Controller Mapping
         xbox.on('leftstickDown', function () {
             console.log('Moving [LEFTSTICK] DOWN');
             my.drone.back(0.3);
@@ -241,11 +267,13 @@ Cylon.robot({
         xbox.on('rightstickDown', function () {
             console.log('Moving [RIGHTSTICK] DOWN');
             if(!landed){
+                //If it receives 20 frames down, it lands
                 if (land > 20){
                     my.drone.land();
                     landed=true;
                     land = 0;
-                }else{
+                }else
+                    //Otherwise it goes down
                     my.drone.down(0.3);
                     land++;
                 }
@@ -253,24 +281,29 @@ Cylon.robot({
         });
         xbox.on('rightstickUp', function () {
             console.log('Moving [RIGHTSTICK] UP');
+            //takeof if it's not flying
             if(landed){
                 my.drone.takeoff();
                 landed = false;
-            }else {
+            }else { //If it's flying it goes up
                 my.drone.up(0.3);
                 land = 0;
             }
         });
+        //Move to the right
         xbox.on('leftstickRight', function () {
             console.log('Moving [LEFTSTICK] RIGHT');
             my.drone.right(0.3);
             land = 0;
         });
+        //Move to the left
         xbox.on('leftstickLeft', function () {
             console.log('Moving [LEFTSTICK] LEFT');
             my.drone.left(0.3);
             land = 0;
         });
+
+        //FLIPS WITH THE a,b,x,y BUTTONS
         xbox.on('a', function() {
             console.log('[A] button press');
             my.drone.backFlip();
@@ -293,4 +326,3 @@ Cylon.robot({
 });
 
 Cylon.start();
-

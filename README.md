@@ -3,8 +3,22 @@ Project for Pervasive Computing - M7012E, Luleå University of Technology
 
 ## Objectives
 * Pilot a Parrot AR Drone using the Leap Motion Controller
-* Display the visuals from the camera into an VR device
+* Pilot a Parrot AR Drone using the XBox Controller
+* Display the visuals from the camera into an Oculus Rift DK2
 * Use motion planning systems to control the Drone ([LeapMotion](https://www.leapmotion.com/))
+
+## Instructions
+The drone can be pilot with three devices, keyboard, LMC and XBox controller asynchronously:
+* Keyboard:
+    - Take off and landing pressing space
+    - Arrows for making flips that way
+
+* LMC:
+    - Take off and landing with KeyTap gesture (As the click of a mouse)
+    - Up, down, left, right, backward and forward with the fingers not opened
+    - Making a circle with the finger, the drone does a flip to that way
+
+* XBox controller:
 
 ## Doc
 
