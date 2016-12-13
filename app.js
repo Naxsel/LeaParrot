@@ -308,11 +308,11 @@ Cylon.robot({
         //FLIPS WITH THE a,b,x,y BUTTONS
         xbox.on('a', function() {
             console.log('[A] button press');
-            my.drone.backFlip();
+            my.drone.takeoff();
         });
         xbox.on('b', function() {
             console.log('[B] button press');
-            my.drone.leftFlip();
+            my.drone.land();
         });
         xbox.on('x', function() {
             console.log('[X] button press');
@@ -322,8 +322,21 @@ Cylon.robot({
             console.log('[Y] button press');
             my.drone.frontFlip();
         });
-        //TODO
-        //add triggers
+        xbox.on('rb', function () {
+            console.log('[LR] button release');
+            my.drone.takeoff();
+            landed = false
+        });
+        xbox.on('lb', function() {
+            console.log('[LB] button press');
+            my.drone.land();
+        });
+
+        //only in linux, emergency stop
+        xbox.on('xbox', function() {
+            console.log('[xbox] button press');
+            my.drone.stop();
+        });
     }
 });
 
