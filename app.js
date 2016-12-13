@@ -8,8 +8,7 @@ var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
 var arDrone = require('ar-drone');
-var stream  = arDrone.createClient();
-require('ar-drone-png-stream')(stream, { port: 8081 });
+
 
 
 //=====================================================================================================================================================//
@@ -32,8 +31,11 @@ var handStartPosition = [],
 var handWasClosedInLastFrame = false;
 
 //=====================================================================================================================================================//
-                                                                //WEB SERVER SETUP
+                                                                //WEB SERVER CONFIG
 //=====================================================================================================================================================//
+
+var stream  = arDrone.createClient();
+require('ar-drone-png-stream')(stream, { port: 8081 });
 
 Cylon.api("http",{
     port: 8080,
@@ -41,7 +43,7 @@ Cylon.api("http",{
 });
 
 //=====================================================================================================================================================//
-                                                                //CONTROL OF DRONE
+                                                                //DRONE CONTROL
 //=====================================================================================================================================================//
 Cylon.robot({
     name: "LeaDrone",
@@ -272,7 +274,7 @@ Cylon.robot({
                     my.drone.land();
                     landed=true;
                     land = 0;
-                }else
+                }else{
                     //Otherwise it goes down
                     my.drone.down(0.3);
                     land++;

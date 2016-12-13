@@ -13,7 +13,7 @@ The drone can be pilot with three devices, keyboard, LMC and XBox controller asy
     - Take off and landing pressing space
     - Arrows for making flips that way
 
-* LMC:
+* LeapMC:
     - Take off and landing with KeyTap gesture (As the click of a mouse)
     - Up, down, left, right, backward and forward with the fingers not opened
     - Making a circle with the finger, the drone does a flip to that way
@@ -34,11 +34,5 @@ The drone can be pilot with three devices, keyboard, LMC and XBox controller asy
 ### Some Links
 * [Control a Parrot AR Drone 2.0 using a Leap Motion in Node.js](https://github.com/charliegerard/leap_drone)
 * [Control the Parrot AR Drone 2.0 with the Leap Motion in Cylon.js](https://github.com/charliegerard/cylon-projects/tree/master/cylon-drone-leapmotion)
+* [HTTP png stream for Parrot AR Drone 2.0](https://www.npmjs.com/package/ar-drone-png-stream)
      
-    "cylon": "^1.3.0",
-    "cylon-api-http": "^0.4.1",
-    "cylon-ardrone": "^0.21.0",
-    "cylon-keyboard": "^0.17.0",
-    "cylon-leapmotion": "^0.21.0",
-    "ffmpeg": "0.0.4",
-    "xbox-controller-node": "^1.6.0"    
