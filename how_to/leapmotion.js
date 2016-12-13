@@ -11,7 +11,7 @@ Cylon.robot({
 
     work: function(my) {
         my.leapmotion.on('hand', function(payload) {
-            Logger.info(payload.toString());
+            console.log(payload.toString());
         });
     }
 }).start();
