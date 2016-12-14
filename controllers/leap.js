@@ -35,6 +35,9 @@ Cylon.robot({
     },
     work: function(my) {
 
+        var landed = true;
+
+
         //Show percentage of battery if it's low
         my.nav.on('lowBattery', function(data){
             console.log("LOW BATTERY: " +data +" %");
@@ -51,10 +54,12 @@ Cylon.robot({
             if (type === "keyTap" || type === "screenTap") {
                 if(landed) {//If it's not flying, it takes off
                     console.log("Leap - takeOff");
-                    // my.drone.takeoff();
+                    my.drone.takeoff();
+                    landed = false;
                 }else{//If it's flying, it lands
                     console.log("Leap - Land");
-                    // my.drone.land();
+                    my.drone.land();
+                    landed = true;
                 }
             }
 
@@ -62,12 +67,12 @@ Cylon.robot({
             if (type === "circle" && stop && progress > CIRCLE_THRESHOLD) {
                 if (gesture.normal[2] < 0) {
                     console.log("Leap - rightFlip");
-                    // my.drone.rightFlip;
+                    my.drone.rightFlip;
                 }
 
                 if (gesture.normal[2] > 0) {
                     console.log("Leap - leftFlipo");
-                    // my.drone.leftFlip;
+                    my.drone.leftFlip;
                 }
             }
         });
@@ -94,12 +99,12 @@ Cylon.robot({
 
                     if (signal > 0) {
                         console.log("Leap - CounterClockwise");
-                        // my.drone.counterClockwise(value);
+                        my.drone.counterClockwise(value);
                     }
 
                     if (signal < 0) {
                         console.log("Leap - CounterClockwise");
-                        // my.drone.clockwise(value);
+                        my.drone.clockwise(value);
                     }
                 }
 
@@ -115,12 +120,12 @@ Cylon.robot({
 
                     if (signal > 0) {
                         console.log("Leap - Up");
-                        // my.drone.up(value);
+                        my.drone.up(value);
                     }
 
                     if (signal < 0) {
                         console.log("Leap - Down");
-                        // my.drone.down(value);
+                        my.drone.down(value);
                     }
                 }
 
@@ -132,7 +137,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - Forward");
-                        // my.drone.forward(value);
+                        my.drone.forward(value);
                     }
 
                     if (hand.palmNormal[2] < 0) {
@@ -141,7 +146,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - Backward");
-                        // my.drone.back(value);
+                        my.drone.back(value);
                     }
                 }
 
@@ -153,7 +158,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - Left");
-                        // my.drone.left(value);
+                        my.drone.left(value);
                     }
 
                     if (hand.palmNormal[0] < 0) {
@@ -162,7 +167,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - right");
-                        // my.drone.right(value);
+                        my.drone.right(value);
                     }
                 }
 
@@ -182,13 +187,13 @@ Cylon.robot({
                 Math.abs(handStartDirection[0] - hand.direction[0]) <
                 TURN_TRESHOLD) {
                     console.log("Leap - hover");
-                    // my.drone.hover();
+                    my.drone.hover();
                 }
             }
 
             if (!handOpen && !handWasClosedInLastFrame) {
                 console.log("Leap - hover");
-                // my.drone.hover();
+                my.drone.hover();
             }
 
             handWasClosedInLastFrame = !handOpen;

@@ -6,11 +6,10 @@ var xbox = require("xbox-controller-node");
 
 var stream  = arDrone.createClient();
 require('ar-drone-png-stream')(stream, { port: 8081 });
-
-// Cylon.api("http",{
-//     port: 8080,
-//     ssl: false
-// });
+Cylon.api("http",{
+    port: 8080,
+    ssl: false
+});
 
 Cylon.robot({
     name: "LeaDrone",
