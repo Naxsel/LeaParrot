@@ -3,9 +3,9 @@
 var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
+var arDrone = require('ar-drone');
 
-var stream  = arDrone.createClient();
-require('ar-drone-png-stream')(stream, { port: 8081 });
+
 Cylon.api("http",{
     port: 8080,
     ssl: false
@@ -34,22 +34,22 @@ Cylon.robot({
         });
         xbox.on('leftstickDown', function () {
             console.log('Moving [LEFTSTICK] DOWN');
-            my.drone.back(0.3);
+            my.drone.back(0.4);
             land = 0;
         });
         xbox.on('leftstickUp', function () {
             console.log('Moving [LEFTSTICK] UP');
-            my.drone.front(0.3);
+            my.drone.front(0.4);
             land = 0;
         });
         xbox.on('rightstickLeft', function () {
             console.log('Moving [RIGHTSTICK] LEFT');
-            my.drone.counterClockwise(0.2);
+            my.drone.counterClockwise(0.3);
             land = 0;
         });
         xbox.on('rightstickRight', function () {
             console.log('Moving [RIGHTSTICK] RIGHT');
-            my.drone.clockwise(0.2);
+            my.drone.clockwise(0.3);
             land = 0;
         });
 
@@ -73,6 +73,9 @@ Cylon.robot({
             //takeof if it's not flying
             if(landed){
                 my.drone.takeoff();
+                after((2).seconds(), function() {
+                    my.drone.hover();
+                });
                 landed = false;
             }else { //If it's flying it goes up
                 my.drone.up(0.3);
@@ -82,13 +85,13 @@ Cylon.robot({
         //Move to the right
         xbox.on('leftstickRight', function () {
             console.log('Moving [LEFTSTICK] RIGHT');
-            my.drone.right(0.3);
+            my.drone.right(0.4);
             land = 0;
         });
         //Move to the left
         xbox.on('leftstickLeft', function () {
             console.log('Moving [LEFTSTICK] LEFT');
-            my.drone.left(0.3);
+            my.drone.left(0.7);
             land = 0;
         });
 
@@ -121,6 +124,15 @@ Cylon.robot({
             my.drone.land();
         });
 
+        xbox.on('start', function() {
+           console.log('[Start] button press');
+           my.drone.ftrim();
+        });
+
+        xbox.on('back', function(){
+            console.log('[Back] button press');
+        });
+
         //Only in linux, emergency stop
         xbox.on('xbox', function() {
             console.log('[xbox] button press');
@@ -130,3 +142,6 @@ Cylon.robot({
 });
 
 Cylon.start();
+
+var stream  = arDrone.createClient();
+require('ar-drone-png-stream')(stream, { port: 8081 });
