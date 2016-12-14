@@ -81,6 +81,14 @@ Cylon.robot({
         my.keyboard.on("left", my.drone.leftFlip);
         my.keyboard.on("up", my.drone.frontFlip);
         my.keyboard.on("down", my.drone.backFlip);
+        my.keyboard.on("w", my.drone.front());
+        my.keyboard.on("a", my.drone.left());
+        my.keyboard.on("s", my.drone.back());
+        my.keyboard.on("d", my.drone.right());
+        my.keyboard.on("i", my.drone.up());
+        my.keyboard.on("k", my.drone.down());
+        my.keyboard.on("j", my.drone.counterClockwise());
+        my.keyboard.on("l", my.drone.clockwise());
 
         my.keyboard.on("space", function(){
             console.log("space pressed");
@@ -334,6 +342,8 @@ Cylon.robot({
             console.log('[Y] button press');
             my.drone.frontFlip();
         });
+
+        //take off and land
         xbox.on('rb', function () {
             console.log('[LR] button release');
             my.drone.takeoff();
@@ -344,7 +354,7 @@ Cylon.robot({
             my.drone.land();
         });
 
-        //only in linux, emergency stop
+        //Only in linux, emergency stop
         xbox.on('xbox', function() {
             console.log('[xbox] button press');
             my.drone.stop();

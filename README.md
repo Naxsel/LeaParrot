@@ -33,10 +33,11 @@ The OS available for the system platform can be any OSX or Linux version, but yo
      - [Drone](https://cylonjs.com/documentation/drivers/ardrone-flight/)
      - [Motion Leap](https://cylonjs.com/documentation/platforms/leapmotion/)
 * Joystick: In this case a Xbox 360 Wireless Controller, and [xbox-controler-node](https://www.npmjs.com/package/xbox-controller-node) as the npm package. Check the link to install the necessary libraries for the gamepad. 
-
+* Png Stream: Ffmpeg is needed to work with the stream. [Install guide](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu)
 
 ### Some Links
 * [Control a Parrot AR Drone 2.0 using a Leap Motion in Node.js](https://github.com/charliegerard/leap_drone)
 * [Control the Parrot AR Drone 2.0 with the Leap Motion in Cylon.js](https://github.com/charliegerard/cylon-projects/tree/master/cylon-drone-leapmotion)
 * [HTTP png stream for Parrot AR Drone 2.0](https://www.npmjs.com/package/ar-drone-png-stream)
-* [Leap Ardrone](https://cylonjs.com/documentation/examples/cylon/js/leap_ardrone/)  
+* [Leap Ardrone](https://cylonjs.com/documentation/examples/cylon/js/leap_ardrone/)
+
