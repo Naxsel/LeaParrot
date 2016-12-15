@@ -7,13 +7,14 @@
 var Cylon = require("cylon");
 var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
-//var arDrone = require('ar-drone');
-
-
+var arDrone = require('ar-drone');
 
 //=====================================================================================================================================================//
                                                         //LEAP MOTION PARAMETERS SETUP
 //=====================================================================================================================================================//
+
+var speed = 0.2;
+var landed = true;
 
 var TURN_TRESHOLD = 0.2,
     TURN_SPEED_FACTOR = 2.0;
@@ -31,11 +32,8 @@ var handStartPosition = [],
 var handWasClosedInLastFrame = false;
 
 //=====================================================================================================================================================//
-                                                                //WEB SERVER CONFIG
+                                                                // CYLON WEB SERVER CONFIG
 //=====================================================================================================================================================//
-
-//var stream  = arDrone.createClient();
-//require('ar-drone-png-stream')(stream, { port: 8081 });
 
 Cylon.api("http",{
     port: 8080,
@@ -51,21 +49,20 @@ Cylon.robot({
     //cylon connections
     connections: {
         leapmotion: { adaptor: 'leapmotion'},
-        keyboard: { adaptor: 'keyboard' },
-        ardrone: { adaptor: 'ardrone', port: "192.168.1.1"}
+        ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
+        keyboard: { adaptor: 'keyboard' }
     },
 
     devices: {
         leapmotion: { driver: 'leapmotion'},
-        keyboard: { driver: 'keyboard', connection:'keyboard' },
         drone: {driver: 'ardrone'},
-        nav : {driver: 'ardrone-nav'},//gives drone's information/state
+        nav : {driver: 'ardrone-nav'},
+        keyboard: { driver: 'keyboard', connection:'keyboard' }
     },
 
     work: function(my) {
 
         var landed = true;
-        var land = 0;
 
         //Show percentage of battery if it's low
         my.nav.on('lowBattery', function(data){
@@ -77,18 +74,18 @@ Cylon.robot({
 //=====================================================================================================================================================//
 
         //With keyboard arrows it does flips to that side
-        my.keyboard.on("right", my.drone.rightFlip);
-        my.keyboard.on("left", my.drone.leftFlip);
-        my.keyboard.on("up", my.drone.frontFlip);
-        my.keyboard.on("down", my.drone.backFlip);
-        my.keyboard.on("w", my.drone.front());
-        my.keyboard.on("a", my.drone.left());
-        my.keyboard.on("s", my.drone.back());
-        my.keyboard.on("d", my.drone.right());
-        my.keyboard.on("i", my.drone.up());
-        my.keyboard.on("k", my.drone.down());
-        my.keyboard.on("j", my.drone.counterClockwise());
-        my.keyboard.on("l", my.drone.clockwise());
+        // my.keyboard.on("right", my.drone.rightFlip);
+        // my.keyboard.on("left", my.drone.leftFlip);
+        // my.keyboard.on("up", my.drone.frontFlip);
+        // my.keyboard.on("down", my.drone.backFlip);
+        // my.keyboard.on("w", my.drone.front());
+        // my.keyboard.on("a", my.drone.left());
+        // my.keyboard.on("s", my.drone.back());
+        // my.keyboard.on("d", my.drone.right());
+        // my.keyboard.on("i", my.drone.up());
+        // my.keyboard.on("k", my.drone.down());
+        // my.keyboard.on("j", my.drone.counterClockwise());
+        // my.keyboard.on("l", my.drone.clockwise());
 
         my.keyboard.on("space", function(){
             console.log("space pressed");
@@ -267,39 +264,34 @@ Cylon.robot({
 
         xbox.on('leftstickDown', function () {
             console.log('Moving [LEFTSTICK] DOWN');
-            my.drone.back(0.3);
-            land = 0;
+            my.drone.back(speed);
         });
         xbox.on('leftstickUp', function () {
             console.log('Moving [LEFTSTICK] UP');
-            my.drone.front(0.3);
-            land = 0;
+            my.drone.front(speed);
+        });
+
+        xbox.on('leftstickRight', function () {
+            console.log('Moving [LEFTSTICK] RIGHT');
+            my.drone.right(speed);
+        });
+        //Move to the left
+        xbox.on('leftstickLeft', function () {
+            console.log('Moving [LEFTSTICK] LEFT');
+            my.drone.left(speed);
         });
         xbox.on('rightstickLeft', function () {
             console.log('Moving [RIGHTSTICK] LEFT');
-            my.drone.counterClockwise(0.2);
-            land = 0;
+            my.drone.counterClockwise(0.3);
         });
         xbox.on('rightstickRight', function () {
             console.log('Moving [RIGHTSTICK] RIGHT');
-            my.drone.clockwise(0.2);
-            land = 0;
+            my.drone.clockwise(0.3);
         });
 
         xbox.on('rightstickDown', function () {
             console.log('Moving [RIGHTSTICK] DOWN');
-            if(!landed){
-                //If it receives 20 frames down, it lands
-                if (land > 20){
-                    my.drone.land();
-                    landed=true;
-                    land = 0;
-                }else{
-                    //Otherwise it goes down
-                    my.drone.down(0.3);
-                    land++;
-                }
-            }
+            my.drone.down(0.3);
         });
         xbox.on('rightstickUp', function () {
             console.log('Moving [RIGHTSTICK] UP');
@@ -309,26 +301,29 @@ Cylon.robot({
                 landed = false;
             }else { //If it's flying it goes up
                 my.drone.up(0.3);
-                land = 0;
             }
         });
-        //Move to the right
-        xbox.on('leftstickRight', function () {
-            console.log('Moving [LEFTSTICK] RIGHT');
-            my.drone.right(0.3);
-            land = 0;
+        xbox.on('rightstickLeft:release', function () {
+            console.log('Moving [RIGHTSTICK] LEFT');
+            my.drone.hover();
         });
-        //Move to the left
-        xbox.on('leftstickLeft', function () {
-            console.log('Moving [LEFTSTICK] LEFT');
-            my.drone.left(0.3);
-            land = 0;
+        xbox.on('rightstickRight:release', function () {
+            console.log('Moving [RIGHTSTICK] Right');
+            my.drone.hover();
+        });
+        xbox.on('rightstickUp:release', function () {
+            console.log('Moving [RIGHTSTICK] Up');
+            my.drone.hover();
+        });
+        xbox.on('rightstickDown:release', function () {
+            console.log('Moving [RIGHTSTICK] Down');
+            my.drone.hover();
         });
 
         //FLIPS WITH THE a,b,x,y BUTTONS
         xbox.on('a', function() {
             console.log('[A] button press');
-            my.drone.takeoff();
+            my.drone.hover();
         });
         xbox.on('b', function() {
             console.log('[B] button press');
@@ -354,6 +349,16 @@ Cylon.robot({
             my.drone.land();
         });
 
+        xbox.on('start', function() {
+            console.log('[Start] button press');
+            my.drone.ftrim();
+        });
+
+        xbox.on('back', function(){
+            console.log('[Back] button press');
+            my.drone.disableEmergency();
+        });
+
         //Only in linux, emergency stop
         xbox.on('xbox', function() {
             console.log('[xbox] button press');
@@ -363,3 +368,6 @@ Cylon.robot({
 });
 
 Cylon.start();
+
+var stream  = arDrone.createClient();
+require('ar-drone-png-stream')(stream, { port: 8081 });

@@ -5,7 +5,7 @@ var ffmpeg = require("ffmpeg");
 var xbox = require("xbox-controller-node");
 var arDrone = require('ar-drone');
 
-
+var speed = 0.2;
 Cylon.api("http",{
     port: 8080,
     ssl: false
@@ -26,7 +26,6 @@ Cylon.robot({
 
     work: function(my) {
         var landed = true;
-        var land = 0;
 
         //Show percentage of battery if it's low
         my.nav.on('lowBattery', function(data){
@@ -34,71 +33,66 @@ Cylon.robot({
         });
         xbox.on('leftstickDown', function () {
             console.log('Moving [LEFTSTICK] DOWN');
-            my.drone.back(0.4);
-            land = 0;
+            my.drone.back(speed);
         });
         xbox.on('leftstickUp', function () {
             console.log('Moving [LEFTSTICK] UP');
-            my.drone.front(0.4);
-            land = 0;
+            my.drone.front(speed);
+        });
+
+        xbox.on('leftstickRight', function () {
+            console.log('Moving [LEFTSTICK] RIGHT');
+            my.drone.right(speed);
+        });
+        //Move to the left
+        xbox.on('leftstickLeft', function () {
+            console.log('Moving [LEFTSTICK] LEFT');
+            my.drone.left(speed);
         });
         xbox.on('rightstickLeft', function () {
             console.log('Moving [RIGHTSTICK] LEFT');
             my.drone.counterClockwise(0.3);
-            land = 0;
         });
         xbox.on('rightstickRight', function () {
             console.log('Moving [RIGHTSTICK] RIGHT');
             my.drone.clockwise(0.3);
-            land = 0;
         });
 
         xbox.on('rightstickDown', function () {
             console.log('Moving [RIGHTSTICK] DOWN');
-            if(!landed){
-                //If it receives 20 frames down, it lands
-                if (land > 20){
-                    my.drone.land();
-                    landed=true;
-                    land = 0;
-                }else{
-                    //Otherwise it goes down
-                    my.drone.down(0.3);
-                    land++;
-                }
-            }
+            my.drone.down(0.3);
         });
         xbox.on('rightstickUp', function () {
             console.log('Moving [RIGHTSTICK] UP');
             //takeof if it's not flying
             if(landed){
                 my.drone.takeoff();
-                after((2).seconds(), function() {
-                    my.drone.hover();
-                });
                 landed = false;
             }else { //If it's flying it goes up
                 my.drone.up(0.3);
-                land = 0;
             }
         });
-        //Move to the right
-        xbox.on('leftstickRight', function () {
-            console.log('Moving [LEFTSTICK] RIGHT');
-            my.drone.right(0.4);
-            land = 0;
+        xbox.on('rightstickLeft:release', function () {
+            console.log('Moving [RIGHTSTICK] LEFT');
+            my.drone.hover();
         });
-        //Move to the left
-        xbox.on('leftstickLeft', function () {
-            console.log('Moving [LEFTSTICK] LEFT');
-            my.drone.left(0.7);
-            land = 0;
+        xbox.on('rightstickRight:release', function () {
+            console.log('Moving [RIGHTSTICK] Right');
+            my.drone.hover();
+        });
+        xbox.on('rightstickUp:release', function () {
+            console.log('Moving [RIGHTSTICK] Up');
+            my.drone.hover();
+        });
+        xbox.on('rightstickDown:release', function () {
+            console.log('Moving [RIGHTSTICK] Down');
+            my.drone.hover();
         });
 
         //FLIPS WITH THE a,b,x,y BUTTONS
         xbox.on('a', function() {
             console.log('[A] button press');
-            my.drone.takeoff();
+            my.drone.hover();
         });
         xbox.on('b', function() {
             console.log('[B] button press');
@@ -131,6 +125,7 @@ Cylon.robot({
 
         xbox.on('back', function(){
             console.log('[Back] button press');
+            my.drone.disableEmergency();
         });
 
         //Only in linux, emergency stop
