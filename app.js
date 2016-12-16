@@ -50,14 +50,14 @@ Cylon.robot({
     connections: {
         leapmotion: { adaptor: 'leapmotion'},
         ardrone: { adaptor: 'ardrone', port: "192.168.1.1"},
-        keyboard: { adaptor: 'keyboard' }
+        // keyboard: { adaptor: 'keyboard' }
     },
 
     devices: {
-        leapmotion: { driver: 'leapmotion'},
-        drone: {driver: 'ardrone'},
-        nav : {driver: 'ardrone-nav'},
-        keyboard: { driver: 'keyboard', connection:'keyboard' }
+        ddrone: { driver: "ardrone", connection: "ardrone" },
+        leapmotion: { driver: "leapmotion", connection: "leapmotion" },
+        nav : {driver: 'ardrone-nav'}
+        // keyboard: { driver: 'keyboard', connection:'keyboard' }
     },
 
     work: function(my) {
@@ -73,31 +73,17 @@ Cylon.robot({
                                                         //KEYBOARD MAPPING
 //=====================================================================================================================================================//
 
-        //With keyboard arrows it does flips to that side
-        // my.keyboard.on("right", my.drone.rightFlip);
-        // my.keyboard.on("left", my.drone.leftFlip);
-        // my.keyboard.on("up", my.drone.frontFlip);
-        // my.keyboard.on("down", my.drone.backFlip);
-        // my.keyboard.on("w", my.drone.front());
-        // my.keyboard.on("a", my.drone.left());
-        // my.keyboard.on("s", my.drone.back());
-        // my.keyboard.on("d", my.drone.right());
-        // my.keyboard.on("i", my.drone.up());
-        // my.keyboard.on("k", my.drone.down());
-        // my.keyboard.on("j", my.drone.counterClockwise());
-        // my.keyboard.on("l", my.drone.clockwise());
-
-        my.keyboard.on("space", function(){
-            console.log("space pressed");
-            //If the drone is not flying, it takes off pressing the space
-            if (landed) {
-                my.drone.takeoff();
-                landed = false;
-            }else{//If the drone is flying, it lands pressing the space
-                my.drone.land();
-                landed = true;
-            }
-        });
+        // my.keyboard.on("space", function(){
+        //     console.log("space pressed");
+        //     //If the drone is not flying, it takes off pressing the space
+        //     if (landed) {
+        //         my.drone.takeoff();
+        //         landed = false;
+        //     }else{//If the drone is flying, it lands pressing the space
+        //         my.drone.land();
+        //         landed = true;
+        //     }
+        // });
 
 //=====================================================================================================================================================//
                                             //LEAP MOTION CONTROLLER MAPPING
@@ -112,31 +98,17 @@ Cylon.robot({
 
             //KeyTap as click with a mouse
             if (type === "keyTap" || type === "screenTap") {
-                if(landed) {//If it's not flying, it takes off
-                    console.log("Leap - takeOff");
-                    // my.drone.takeoff();
-                    landed = false;
-                }else{//If it's flying, it lands
-                    console.log("Leap - Land");
-                    // my.drone.land();
-                    landed = true;
-                }
-            }
-
-            //Flip with the gesture of a circle with the finger
-            if (type === "circle" && stop && progress > CIRCLE_THRESHOLD) {
-                if (gesture.normal[2] < 0) {
-                    console.log("Leap - rightFlip");
-                    // my.drone.rightFlip;
-                }
-
-                if (gesture.normal[2] > 0) {
-                    console.log("Leap - leftFlipo");
-                    // my.drone.leftFlip;
+                if(landed){
+                    my.drone.takeoff();
+                    console.log("takeoff");
+                    landed= false;
+                }else{
+                    my.drone.land();
+                    console.log("land");
+                    landed = true
                 }
             }
         });
-
         my.leapmotion.on("hand", function(hand) {
             var signal, value;
             var handOpen = !!hand.fingers.filter(function(f) {
@@ -159,12 +131,12 @@ Cylon.robot({
 
                     if (signal > 0) {
                         console.log("Leap - CounterClockwise");
-                        // my.drone.counterClockwise(value);
+                        my.drone.counterClockwise(value);
                     }
 
                     if (signal < 0) {
-                        console.log("Leap - CounterClockwise");
-                        // my.drone.clockwise(value);
+                        console.log("Leap - Clockwise");
+                        my.drone.clockwise(value);
                     }
                 }
 
@@ -180,12 +152,12 @@ Cylon.robot({
 
                     if (signal > 0) {
                         console.log("Leap - Up");
-                        // my.drone.up(value);
+                        my.drone.up(value);
                     }
 
                     if (signal < 0) {
                         console.log("Leap - Down");
-                        // my.drone.down(value);
+                        my.drone.down(value);
                     }
                 }
 
@@ -197,7 +169,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - Forward");
-                        // my.drone.forward(value);
+                        my.drone.forward(value);
                     }
 
                     if (hand.palmNormal[2] < 0) {
@@ -206,7 +178,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - Backward");
-                        // my.drone.back(value);
+                        my.drone.back(value);
                     }
                 }
 
@@ -218,7 +190,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - Left");
-                        // my.drone.left(value);
+                        my.drone.left(value);
                     }
 
                     if (hand.palmNormal[0] < 0) {
@@ -227,7 +199,7 @@ Cylon.robot({
                             DIRECTION_SPEED_FACTOR
                         );
                         console.log("Leap - right");
-                        // my.drone.right(value);
+                        my.drone.right(value);
                     }
                 }
 
@@ -246,14 +218,16 @@ Cylon.robot({
                 // within turn threshold
                 Math.abs(handStartDirection[0] - hand.direction[0]) <
                 TURN_TRESHOLD) {
-                    console.log("Leap - hover");
-                    // my.drone.hover();
+                    console.log("Leap - stop");
+                    my.drone.stop();
+                    landed = true;
                 }
             }
 
             if (!handOpen && !handWasClosedInLastFrame) {
-                console.log("Leap - hover");
-                // my.drone.hover();
+                console.log("Leap - stop");
+                my.drone.stop();
+                landed = true;
             }
 
             handWasClosedInLastFrame = !handOpen;
